@@ -1,0 +1,40 @@
+name: Build
+on:
+  push:
+    paths:
+      - '*.c'
+      - '*.h'
+      - 'Android.mk'
+      - '.github/workflows/build.yml'
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Android SDK & NDK
+        uses: android-actions/setup-android@v3
+        with:
+          packages: "cmdline-tools;latest platform-tools ndk;24.0.8215888"
+
+      - name: Build native tool (arm64-v8a)
+        env:
+          ANDROID_NDK_HOME: ${{ env.ANDROID_SDK_ROOT }}/ndk/24.0.8215888
+          ABI: arm64-v8a
+          PLATFORM: android-28
+        run: |
+          echo "Using NDK at: $ANDROID_NDK_HOME"
+          "$ANDROID_NDK_HOME/ndk-build" \
+            NDK_PROJECT_PATH=. \
+            APP_BUILD_SCRIPT=Android.mk \
+            APP_ABI=$ABI \
+            APP_PLATFORM=$PLATFORM
+
+      - name: Upload artifacts (arm64-v8a)
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-binaries-arm64-v8a
+          path: libs/arm64-v8a/*
