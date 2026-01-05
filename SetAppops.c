@@ -208,13 +208,13 @@ int main() {
     init_package_list(&skipped_no_permission_pkgs);
 
     
-    char *pkg_output = execute_command("pm list packages -3 2>/dev/null | cut -d: -f2");
+    char *pkg_output = execute_command("pm list packages 2>/dev/null | cut -d: -f2");
     int pkg_count;
     char **pkg_list = split_string(pkg_output ? pkg_output : "", '\n', &pkg_count);
     free(pkg_output);
 
     if (pkg_count == 0) {
-        printf("警告: 'pm list packages -3' ユーザーアプリ無し）。\n");
+        printf("警告: 'pm list packages ' アプリ無し）。\n");
         pkg_output = execute_command("pm list packages | cut -d: -f2");
         free(pkg_list); 
         pkg_list = split_string(pkg_output ? pkg_output : "", '\n', &pkg_count);
