@@ -69,7 +69,7 @@ int execute_command_no_output(const char *cmd) {
 
 int main() {
     const char *packages[] = {
-        "com.aefyr.sai",
+        "com.speedsoftware.rootexplorer",
         "com.android.chrome",
         "com.topjohnwu.magisk",
         "com.alphainventor.filemanager"
@@ -143,7 +143,6 @@ int main() {
         to_lowercase(appops_lower2);
 
         if (!strstr(appops_lower2, "allow")) {
-            // No action, just free
         }
         free(appops_lower2);
         free(appops_out2);
