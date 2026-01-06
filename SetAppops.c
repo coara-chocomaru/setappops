@@ -69,7 +69,6 @@ int execute_command_no_output(const char *cmd) {
 
 int main() {
     const char *packages[] = {
-        "com.speedsoftware.rootexplorer",
         "com.android.chrome",
         "com.topjohnwu.magisk",
         "com.alphainventor.filemanager"
