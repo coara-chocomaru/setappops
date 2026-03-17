@@ -48,7 +48,7 @@ static int disable_selinux(void) {
 }
 
 int main(void) {
-    klog("=== SELinux Permissive2");
+    klog("SELinux Permissive2");
     if (is_enforcing() == 1) {
         disable_selinux();
     } else {
