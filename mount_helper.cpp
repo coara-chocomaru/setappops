@@ -44,7 +44,6 @@ int main(int argc, char** argv) {
     } else if (strcmp(opt, "-f") == 0) {
         mount_part("factory");
     } else if (strcmp(opt, "-all") == 0) {
-        mount_part("cache");
         mount_part("vendor");
         mount_part("factory");
     } else if (strcmp(opt, "-um") == 0) {
