@@ -1,7 +1,6 @@
 LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
-
 LOCAL_SRC_FILES := mount_helper.cpp
 LOCAL_MODULE := mount_helper
 LOCAL_MODULE_TAGS := optional
