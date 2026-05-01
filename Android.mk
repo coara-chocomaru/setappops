@@ -1,5 +1,6 @@
 LOCAL_PATH := $(call my-dir)
 
+
 include $(CLEAR_VARS)
 LOCAL_MODULE := authencesn_exact
 LOCAL_SRC_FILES := authencesn_exact.cpp
