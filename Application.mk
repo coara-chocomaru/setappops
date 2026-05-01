@@ -1,4 +1,5 @@
 APP_ABI := arm64-v8a
-APP_PLATFORM := android-27
+APP_PLATFORM := android-21
 APP_STL := c++_static
-APP_CPPFLAGS := -std=c++17
+APP_OPTIM := release
+NDK_TOOLCHAIN_VERSION := clang
