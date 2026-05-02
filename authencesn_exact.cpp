@@ -185,7 +185,7 @@ int main() {
 
     int file_fd = open("/system/bin/dmesg", O_RDONLY);
     if (file_fd < 0) {
-        perror("open /system/bin/dmesg");
+        perror("open /system/bin/dumpstate");
         free(decompressed);
         return 1;
     }
